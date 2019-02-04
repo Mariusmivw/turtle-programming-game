@@ -1,11 +1,14 @@
 const gridSize = 600;
-const menuWidth = 250;
+const menuWidth = 251;
 const cells = 10;
 const cellSize = gridSize / cells;
 let selectedColor = 1;
+let centerClicked = 0;
 const settings = {
 	grid: [],
-	colors: 12
+	colors: 5,
+	pos: [0, 0, 0],
+	fonctions: []
 };
 for (let i = 0; i < cells; i++) {
 	settings.grid.push([]);
@@ -13,17 +16,49 @@ for (let i = 0; i < cells; i++) {
 		settings.grid[i].push(0);
 	}
 }
-let input;
+let colorInput;
+let fonctionAmountInput;
+let fonctionInputs = [];
 
 function setup() {
 	const c = createCanvas(gridSize + menuWidth + 1, gridSize + 1).elt;
 	document.getElementById('canvasContainer').append(c);
-	input = createInput(settings.colors.toString(), 'number');
-	input.elt.min = '1';
-	input.position(c.offsetLeft + gridSize + 5, c.offsetTop);
-	input.input(function () {
+	colorInput = createInput(settings.colors.toString(), 'number');
+	colorInput.elt.min = '1';
+	colorInput.position(c.offsetLeft + gridSize + 5, c.offsetTop);
+	colorInput.input(function() {
 		settings.colors = parseInt(this.value());
-	})
+		let y = c.offsetTop + (ceil(settings.colors / floor(menuWidth / 25)) + 2) * 25;
+		fonctionAmountInput.position(c.offsetLeft + gridSize + 5, y);
+		for (let i = 0; i < fonctionInputs.length; i++) {
+			fonctionInputs[i].position(c.offsetLeft + gridSize + 5, y + 25 + i * 25);
+		}
+	});
+	fonctionAmountInput = createInput('1', 'number');
+	fonctionAmountInput.elt.min = '1';
+	fonctionAmountInput.position(c.offsetLeft + gridSize + 5, c.offsetTop + (ceil(settings.colors / floor(menuWidth / settings.colors)) + 2) * 25);
+	fonctionAmountInput.input(function() {
+		const amount = parseInt(this.value());
+		settings.fonctions.splice(amount);
+		for (let i = amount; i < fonctionInputs.length; i++) {
+			fonctionInputs[i].remove();
+		}
+		fonctionInputs.splice(amount);
+		const y = c.offsetTop + (ceil(settings.colors / floor(menuWidth / 25)) + 3) * 25;
+		for (let i = 0; i < amount; i++) {
+			if (!fonctionInputs[i]) {
+				const input = createInput('4', 'number');
+				input.elt.min = '2';
+				input.position(c.offsetLeft + gridSize + 5, y + i * 25);
+				input.input(() => {
+					settings.fonctions[i] = parseInt(input.value());
+				});
+				input._events.input();
+				fonctionInputs.push(input);
+			}
+		}
+	});
+	fonctionAmountInput._events.input();
 }
 
 function draw() {
@@ -54,13 +89,31 @@ function drawGrid() {
 		if (mouseIsPressed) {
 			if (mouseButton === RIGHT) {
 				settings.grid[gridPos[0]][gridPos[1]] = 0;
+			} else if (mouseButton === CENTER) {
+				drawGridCell(gridPos[0], gridPos[1], selectedColor);
+				if (++centerClicked != frameCount) {
+					centerClicked = frameCount;
+					const p = [gridPos[0], gridPos[1], settings.pos[2]];
+					if (settings.pos[0] == p[0] && settings.pos[1] == p[1]) {
+						settings.pos[2] = (++settings.pos[2]) % 4;
+					} else {
+						settings.pos = p;
+					}
+				}
 			} else {
 				settings.grid[gridPos[0]][gridPos[1]] = selectedColor;
+				drawGridCell(gridPos[0], gridPos[1], selectedColor);
 			}
 		} else {
 			drawGridCell(gridPos[0], gridPos[1], selectedColor);
 		}
 	}
+
+	push();
+	translate(30 + 60 * settings.pos[0], 30 + 60 * settings.pos[1]);
+	rotate(PI / 2 * settings.pos[2]);
+	triangle(0, 0, -20, 20, 20, 20);
+	pop();
 }
 
 function getGridMousePos() {
@@ -146,7 +199,7 @@ window.addEventListener('contextmenu', e => {
 	e.preventDefault();
 });
 
-const resize = function () {
+const resize = function() {
 	const rows = ceil(sqrt(this.value.length / 6)); // 5:30 -> a:6*a -> size = a*(6*a) = a*6*a = 6*a^2
 	this.style.height = 'auto';
 	this.style.width = 'auto';
