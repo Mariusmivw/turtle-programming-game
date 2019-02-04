@@ -2,27 +2,28 @@ const gridSize = 600;
 const menuWidth = 250;
 const cells = 10;
 const cellSize = gridSize / cells;
-let colors;
-let selectedColor;
+let selectedColor = 1;
 const settings = {
-	grid: []
-}
+	grid: [],
+	colors: 12
+};
 for (let i = 0; i < cells; i++) {
 	settings.grid.push([]);
 	for (let u = 0; u < cells; u++) {
 		settings.grid[i].push(0);
 	}
 }
+let input;
 
 function setup() {
-	colors = {
-		RED: color(200, 55, 55),
-		GREEN: color(55, 200, 55),
-		BLUE: color(55, 55, 200)
-	}
-	selectedColor = colors.RED;
-	const c = createCanvas(gridSize + menuWidth, gridSize + 1).elt;
+	const c = createCanvas(gridSize + menuWidth + 1, gridSize + 1).elt;
 	document.getElementById('canvasContainer').append(c);
+	input = createInput(settings.colors.toString(), 'number');
+	input.elt.min = '1';
+	input.position(c.offsetLeft + gridSize + 5, c.offsetTop);
+	input.input(function () {
+		settings.colors = parseInt(this.value());
+	})
 }
 
 function draw() {
@@ -36,8 +37,20 @@ function drawGrid() {
 		line(i * cellSize, 0, i * cellSize, gridSize);
 		line(0, i * cellSize, gridSize, i * cellSize);
 	}
+	for (let i = 0; i < settings.grid.length; i++) {
+		for (let u = 0; u < settings.grid[i].length; u++) {
+			if (settings.grid[i][u]) {
+				drawGridCell(i, u, settings.grid[i][u]);
+			}
+		}
+	}
 	const gridPos = getGridMousePos();
-	if (gridPos[0] < cells && gridPos[1] < cells && gridPos[0] >= 0 && gridPos[1] >= 0) {
+	if (
+		gridPos[0] < cells &&
+		gridPos[1] < cells &&
+		gridPos[0] >= 0 &&
+		gridPos[1] >= 0
+	) {
 		if (mouseIsPressed) {
 			if (mouseButton === RIGHT) {
 				settings.grid[gridPos[0]][gridPos[1]] = 0;
@@ -48,14 +61,7 @@ function drawGrid() {
 			drawGridCell(gridPos[0], gridPos[1], selectedColor);
 		}
 	}
-	for (let i = 0; i < settings.grid.length; i++) {
-		for (let u = 0; u < settings.grid[i].length; u++) {
-			if (settings.grid[i][u]) {
-				drawGridCell(i, u, settings.grid[i][u]);
 			}
-		}
-	}
-}
 
 function getGridMousePos() {
 	const gridX = floor(mouseX / cellSize);
@@ -65,91 +71,60 @@ function getGridMousePos() {
 
 function drawGridCell(x, y, c) {
 	push();
-	fill(c);
+	colorMode(HSL);
+	fill((360 / settings.colors) * (c - 1), 57, 50);
 	rect(x * cellSize, y * cellSize, cellSize, cellSize);
 	pop();
 }
 
 function drawMenu() {
 	push();
-	const menuX = menuWidth / 2 + gridSize;
-	const menuY = gridSize / 2;
-	const buttonSize = 20;
-
 	rectMode(CENTER);
-	fill(colors.RED);
-	rect(menuX, menuY - 25, buttonSize, buttonSize);
-	fill(colors.GREEN);
-	rect(menuX, menuY, buttonSize, buttonSize);
-	fill(colors.BLUE);
-	rect(menuX, menuY + 25, buttonSize, buttonSize);
-	if (mouseIsPressed) {
-		if (mouseX > menuX - buttonSize / 2 && mouseX < menuX + buttonSize / 2) {
-			if (mouseY > menuY - 25 - buttonSize / 2 && mouseY < menuY - 25 + buttonSize / 2) {
-				selectedColor = colors.RED;
-			} else if (mouseY > menuY - buttonSize / 2 && mouseY < menuY + buttonSize / 2) {
-				selectedColor = colors.GREEN;
-			} else if (mouseY > menuY + 25 - buttonSize / 2 && mouseY < menuY + 25 + buttonSize / 2) {
-				selectedColor = colors.BLUE;
+	colorMode(HSL);
+	const buttonSize = 20;
+	const spacing = 5;
+	let x = gridSize + buttonSize / 2 + spacing;
+	let y = buttonSize / 2 + buttonSize + spacing;
+	for (let i = 0; i < settings.colors; i++) {
+		fill((360 / settings.colors) * i, 57, 50);
+		rect(x, y, buttonSize, buttonSize);
+		x += buttonSize + spacing;
+		if (x > gridSize + menuWidth - buttonSize / 2) {
+			y += buttonSize + spacing;
+			x = gridSize + buttonSize / 2 + spacing;
 			}
 		}
+	if (mouseIsPressed) {
+		const h = floor((mouseX - gridSize) / (buttonSize + spacing)) + 1;
+		const v = floor((mouseY - buttonSize - spacing) / (buttonSize + spacing));
+		if (
+			(mouseX - gridSize) % (buttonSize + spacing) > spacing &&
+			mouseY % (buttonSize + spacing) < buttonSize
+		) {
+			const c = v * floor(menuWidth / (buttonSize + spacing)) + h;
+			selectedColor = c > settings.colors || c < 1 ? selectedColor : c;
 	}
-	let y = menuY;
-	switch (selectedColor) {
-		case colors.RED:
-			y -= 25;
-			break;
-		case colors.BLUE:
-			y += 25;
-			break;
 	}
-	fill(0, 0);
+	noFill();
 	stroke(255, 255, 255);
 	strokeWeight(2);
-	rect(menuX, y, buttonSize, buttonSize);
+	rect(gridSize + buttonSize / 2 + spacing + (buttonSize + spacing) * ((selectedColor - 1) % floor(menuWidth / (buttonSize + spacing))), buttonSize / 2 + (buttonSize + spacing) * ceil(selectedColor / floor(menuWidth / (buttonSize + spacing))), buttonSize, buttonSize);
 	pop();
 }
 
 function keyPressed() {
-	switch (key) {
-		case '1':
-			selectedColor = colors.RED;
-			break;
-		case '2':
-			selectedColor = colors.GREEN;
-			break;
-		case '3':
-			selectedColor = colors.BLUE;
-			break;
+	selectedColor =
+		isNaN(parseInt(key)) ||
+		parseInt(key) > settings.colors ||
+		parseInt(key) == 0 ?
+		selectedColor :
+		parseInt(key);
+}
 	}
 }
 
 function saveGrid() {
-	const t = {};
-	for (const prop in settings) {
-		t[prop] = settings[prop];
-	}
-	t.grid = [];
-	for (let i = 0; i < settings.grid.length; i++) {
-		t.grid.push([])
-		for (let u = 0; u < settings.grid[i].length; u++) {
-			switch (settings.grid[i][u]) {
-				case colors.RED:
-					t.grid[i].push(1);
-					break;
-				case colors.GREEN:
-					t.grid[i].push(2);
-					break;
-				case colors.BLUE:
-					t.grid[i].push(3);
-					break;
-				default:
-					t.grid[i].push(0);
-					break;
-			}
-		}
-	}
-	const saveData = LZString.compressToBase64(LZString.compress(JSON.stringify(t)));
+	const saveData = LZString.compressToBase64(JSON.stringify(settings));
 	const field = document.getElementById('saveData');
 	field.value = saveData;
 	field.style.display = 'block';
@@ -160,6 +135,6 @@ function saveGrid() {
 	field.cols = rows * 6;
 }
 
-window.addEventListener('contextmenu', (e) => {
+window.addEventListener('contextmenu', e => {
 	e.preventDefault();
 });

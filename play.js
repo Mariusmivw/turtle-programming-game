@@ -6,19 +6,14 @@ let colors;
 let selectedColor;
 const settings = {
 	grid: [],
-	fonctions: [4, 3, 6]
+	fonctions: [4, 3, 6],
+	colors: 3
 };
 
 function setup() {
-	colors = {
-		RED: color(200, 55, 55),
-		GREEN: color(55, 200, 55),
-		BLUE: color(55, 55, 200)
-	}
-	selectedColor = colors.RED;
 	const c = createCanvas(gridSize + menuWidth, gridSize + 1).elt;
 	document.getElementById('canvasContainer').append(c);
-	loadGrid('kHsjOCQHIIQGmKBGi2A4gCKBYAw4zeBnWwsuiDcVQYgOAdjQOxSBcy4NC/gT2WCNLoJnbg56qDV24P5XgG+SBRAYB2wgIw6D1jIIA8gAT5A=')
+	loadGrid('N4Ig5gTglgJiBcBtRAGANOzHtcwXTVTQEY0AWcyi6ylAo03HbAZg3vUeabbsM+6DeHEoJ7t+opuL4MxzYZIBMaFWtUaViotPl0CIAMYB7ADbGIAZwRkAvkA=')
 }
 
 function draw() {
@@ -44,7 +39,8 @@ function drawGrid() {
 
 function drawGridCell(x, y, c) {
 	push();
-	fill(c);
+	colorMode(HSL);
+	fill((360 / settings.colors) * (c - 1), 57, 50);
 	rect(x * cellSize, y * cellSize, cellSize, cellSize);
 	pop();
 }
@@ -56,16 +52,20 @@ function drawMenu() {
 
 function drawFonctions() {
 	push();
-	rectMode(CENTER);
+	const size = 24;
+	const boxSize = size * 1.25;
+	const xStart = gridSize + menuWidth / 8;
 	let y = gridSize / 2;
-	text('Fonctions:', menuWidth / 4 + gridSize, gridSize / 2);
+	textSize(size);
+	rectMode(CENTER);
+	text('Fonctions:', menuWidth / 4 + gridSize, y + size / 3);
 	for (let i = 0; i < settings.fonctions.length; i++) {
-		let x = gridSize + menuWidth / 8;
-		y += 16;
-		text('F' + (i + 1).toString(), x - menuWidth / 32 * 1.5, y + 4)
+		let x = xStart;
+		y += boxSize;
+		text('F' + (i + 1).toString(), x - menuWidth / 32 * size / 8, y + size / 3)
 		for (let u = 0; u < settings.fonctions[i]; u++) {
-			x += menuWidth / 16;
-			rect(x, y, 16, 16);
+			x += boxSize;
+			rect(x, y, boxSize, boxSize);
 		}
 	}
 	pop();
@@ -73,62 +73,45 @@ function drawFonctions() {
 
 function drawSelection() {
 	push();
-	const menuX = menuWidth / 4 * 3 + gridSize;
-	const menuY = gridSize / 2;
-	const buttonSize = 20;
-
 	rectMode(CENTER);
-	fill(colors.RED);
-	rect(menuX, menuY - 25, buttonSize, buttonSize);
-	fill(colors.GREEN);
-	rect(menuX, menuY, buttonSize, buttonSize);
-	fill(colors.BLUE);
-	rect(menuX, menuY + 25, buttonSize, buttonSize);
-
-	if (mouseIsPressed) {
-		if (mouseX > menuX - buttonSize / 2 && mouseX < menuX + buttonSize / 2) {
-			if (mouseY > menuY - 25 - buttonSize / 2 && mouseY < menuY - 25 + buttonSize / 2) {
-				selectedColor = colors.RED;
-			} else if (mouseY > menuY - buttonSize / 2 && mouseY < menuY + buttonSize / 2) {
-				selectedColor = colors.GREEN;
-			} else if (mouseY > menuY + 25 - buttonSize / 2 && mouseY < menuY + 25 + buttonSize / 2) {
-				selectedColor = colors.BLUE;
-			}
+	colorMode(HSL);
+	const buttonSize = 20;
+	const spacing = 5;
+	let x = gridSize + buttonSize / 2 + spacing;
+	let y = buttonSize / 2 + buttonSize + spacing;
+	for (let i = 0; i < settings.colors; i++) {
+		fill((360 / settings.colors) * i, 57, 50);
+		rect(x, y, buttonSize, buttonSize);
+		x += buttonSize + spacing;
+		if (x > gridSize + menuWidth - buttonSize / 2) {
+			y += buttonSize + spacing;
+			x = gridSize + buttonSize / 2 + spacing;
 		}
 	}
+	if (mouseIsPressed) {
+		const h = floor((mouseX - gridSize) / (buttonSize + spacing)) + 1;
+		const v = floor((mouseY - buttonSize - spacing) / (buttonSize + spacing));
+		if (
+			(mouseX - gridSize) % (buttonSize + spacing) > spacing &&
+			mouseY % (buttonSize + spacing) < buttonSize
+		) {
+			const c = v * floor(menuWidth / (buttonSize + spacing)) + h;
+			selectedColor = c > settings.colors || c < 1 ? selectedColor : c;
+		}
+	}
+	// noFill();
+	// stroke(255, 255, 255);
+	// strokeWeight(2);
+	// rect(gridSize + buttonSize / 2 + spacing + (buttonSize + spacing) * ((selectedColor - 1) % floor(menuWidth / (buttonSize + spacing))), buttonSize / 2 + (buttonSize + spacing) * ceil(selectedColor / floor(menuWidth / (buttonSize + spacing))), buttonSize, buttonSize);
 	pop();
 }
 
 function loadGrid(saveData) {
 	const field = document.getElementById('saveData');
-	const data = JSON.parse(LZString.decompress(LZString.decompressFromBase64(saveData || field.value)));
+	const data = JSON.parse(LZString.decompressFromBase64(saveData || field.value));
 
 	for (const setting in data) {
 		settings[setting] = data[setting];
-	}
-
-	// fix grid ([1, 3, 1, 2] => [colors.RED, colors.BLUE, colors.RED, colors.GREEN])
-
-	settings.grid = [];
-
-	for (let i = 0; i < data.grid.length; i++) {
-		settings.grid.push([]);
-		for (let u = 0; u < data.grid[i].length; u++) {
-			switch (data.grid[i][u]) {
-				case 1:
-					settings.grid[i].push(colors.RED);
-					break;
-				case 2:
-					settings.grid[i].push(colors.GREEN);
-					break;
-				case 3:
-					settings.grid[i].push(colors.BLUE);
-					break;
-				default:
-					settings.grid[i].push(0);
-					break;
-			}
-		}
 	}
 }
 
@@ -136,7 +119,7 @@ window.addEventListener('contextmenu', (e) => {
 	e.preventDefault();
 });
 
-const resize = function() {
+const resize = function () {
 	const rows = ceil(sqrt(this.value.length / 6)); // 5:30 -> a:6*a -> size = a*(6*a) = a*6*a = 6*a^2
 	this.style.height = 'auto';
 	this.style.width = 'auto';
