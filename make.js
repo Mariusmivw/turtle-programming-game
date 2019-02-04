@@ -61,7 +61,7 @@ function drawGrid() {
 			drawGridCell(gridPos[0], gridPos[1], selectedColor);
 		}
 	}
-			}
+}
 
 function getGridMousePos() {
 	const gridX = floor(mouseX / cellSize);
@@ -92,8 +92,8 @@ function drawMenu() {
 		if (x > gridSize + menuWidth - buttonSize / 2) {
 			y += buttonSize + spacing;
 			x = gridSize + buttonSize / 2 + spacing;
-			}
 		}
+	}
 	if (mouseIsPressed) {
 		const h = floor((mouseX - gridSize) / (buttonSize + spacing)) + 1;
 		const v = floor((mouseY - buttonSize - spacing) / (buttonSize + spacing));
@@ -103,7 +103,7 @@ function drawMenu() {
 		) {
 			const c = v * floor(menuWidth / (buttonSize + spacing)) + h;
 			selectedColor = c > settings.colors || c < 1 ? selectedColor : c;
-	}
+		}
 	}
 	noFill();
 	stroke(255, 255, 255);
@@ -120,6 +120,13 @@ function keyPressed() {
 		selectedColor :
 		parseInt(key);
 }
+
+function loadGrid(saveData) {
+	const field = document.getElementById('saveData');
+	const data = JSON.parse(LZString.decompressFromBase64(saveData || field.value));
+
+	for (const setting in data) {
+		settings[setting] = data[setting];
 	}
 }
 
@@ -138,3 +145,15 @@ function saveGrid() {
 window.addEventListener('contextmenu', e => {
 	e.preventDefault();
 });
+
+const resize = function () {
+	const rows = ceil(sqrt(this.value.length / 6)); // 5:30 -> a:6*a -> size = a*(6*a) = a*6*a = 6*a^2
+	this.style.height = 'auto';
+	this.style.width = 'auto';
+	this.rows = rows;
+	this.cols = rows * 6;
+};
+
+document.getElementById('saveData').addEventListener('input', resize);
+document.getElementById('saveData').addEventListener('change', resize);
+document.getElementById('saveData').addEventListener('keydown', resize);
