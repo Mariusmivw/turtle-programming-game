@@ -16,7 +16,8 @@ let selectedFonction = [0, 0];
 function setup() {
 	const c = createCanvas(gridSize + menuWidth, gridSize + 1).elt;
 	document.getElementById('canvasContainer').append(c);
-	loadGrid('N4Ig5gTglgJiBcBtRAGANOzHtcwXTVTQEY0AWcyi6ylAo03HbAZg3vUeabbsM+6DeHEoJ7t+opuL4MxzYZIBMaFWtUaViotPl0CIAMYB7ADbGIAZwQUQAB2PWkpFwYBmxgHaGALlC9OiAAcaCFheAC+QA===')
+	loadGrid('N4Ig5gTglgJiBcBtRAGANOzHtcwXTVTQEY0AWcyi6ylAo03HbAZg3vUeabbsM+6DeHEoJ7t+opuL4MxzYZIBMaFWtUaViotPl0CIAMYB7ADbGIAZwQUQAB2PWkpFwYBmxgHaGALlC9OiDTUeAC+QA===');
+	textAlign(LEFT, CENTER);
 }
 
 function draw() {
@@ -40,8 +41,8 @@ function drawGrid() {
 	}
 
 	push();
-	translate(30 + 60 * settings.pos[0], 30 + 60 * settings.pos[1]);
-	rotate(PI / 2 * settings.pos[2]);
+	translate(30 + 60 * pos[0], 30 + 60 * pos[1]);
+	rotate(PI / 2 * pos[2]);
 	triangle(0, 0, -20, 20, 20, 20);
 	pop();
 }
@@ -94,31 +95,26 @@ function drawMenu() {
 	x = gridSize + rectSize / 2 + spacing;
 	y += (rectSize + spacing) * 2;
 	let directivesY = y;
-	push();
-	translate(x, y);
-	for (let i = 0; i < 3; i++) {
-		rect(0, 0, rectSize, rectSize);
-		push();
-		rotate(PI / 2 * (i - 1));
-		triangle(0, 0, -rectSize / 3, rectSize / 3, rectSize / 3, rectSize / 3);
-		pop();
-		translate(rectSize + spacing, 0);
+	for (let i = 0; i < 3 + settings.fonctions.length; i++) {
+		rect(x, y, rectSize, rectSize);
+		drawDirective(i, x, y, rectSize);
+		x += rectSize + spacing;
 	}
-	pop();
 	pop();
 
 	// draw Fonctions
 	push();
 	rectMode(CENTER);
-	x = gridSize + rectSize / 2 + spacing;
+	x = gridSize + spacing;
 	y += (rectSize + spacing) * 2;
 	let fonctionsY = y;
 	textSize(rectSize / 1.25);
-	text('Fonctions:', x - textSize() + spacing, y + rectSize / 2 - textSize() / 4);
+	text('Fonctions:', x, y);
+	textAlign(CENTER, CENTER);
 	for (let i = 0; i < settings.fonctions.length; i++) {
 		x = gridSize + rectSize / 2 + spacing;
 		y += rectSize + spacing;
-		text('F' + (i + 1).toString(), x - textSize() + spacing, y + rectSize / 2 - textSize() / 4);
+		text('F' + (i + 1).toString(), x, y);
 		for (let u = 0; u < settings.fonctions[i]; u++) {
 			x += rectSize;
 
@@ -137,18 +133,9 @@ function drawMenu() {
 
 			if (c) pop();
 
-			let d = false;
-			try {
-				if (typeof(fonctions[i][u][0]) == 'number') {
-					push();
-					translate(x, y);
-					rotate(PI / 2 * (fonctions[i][u][0] - 1));
-					triangle(0, 0, -rectSize / 3, rectSize / 3, rectSize / 3, rectSize / 3);
-					d = true;
-				}
-			} catch {}
-
-			if (d) pop();
+			if (fonctions[i] && fonctions[i][u] && typeof(fonctions[i][u][0]) == 'number') {
+				drawDirective(fonctions[i][u][0], x, y, rectSize);
+			}
 		}
 	}
 	push();
@@ -173,7 +160,7 @@ function drawMenu() {
 		// directives
 		const dth = mouseX - gridSize;
 		const dh = floor(dth / (rectSize + spacing));
-		const dtv = mouseY - rectSize - spacing - directivesY;
+		const dtv = mouseY - rectSize / 2 - spacing - directivesY;
 		const dv = floor(dtv / (rectSize + spacing)) + 1;
 		const d = dv * floor(menuWidth / (rectSize + spacing)) + dh;
 
@@ -188,10 +175,58 @@ function drawMenu() {
 			fonctions[selectedFonction[0]] = fonctions[selectedFonction[0]] || [];
 			fonctions[selectedFonction[0]][selectedFonction[1]] = fonctions[selectedFonction[0]][selectedFonction[1]] || [];
 			fonctions[selectedFonction[0]][selectedFonction[1]][1] = c;
-		} else if (dth % (rectSize + spacing) > spacing && dtv % (rectSize + spacing) < rectSize && d < 4 && d >= 0) {
+		} else if (dth % (rectSize + spacing) > spacing && dtv % (rectSize + spacing) < rectSize && d < 3 + settings.fonctions.length && d >= 0) {
 			fonctions[selectedFonction[0]] = fonctions[selectedFonction[0]] || [];
 			fonctions[selectedFonction[0]][selectedFonction[1]] = fonctions[selectedFonction[0]][selectedFonction[1]] || [];
 			fonctions[selectedFonction[0]][selectedFonction[1]][0] = d;
+		}
+	}
+}
+
+function drawDirective(n, x, y, s) {
+	push();
+	switch (n) {
+		case 0:
+		case 1:
+		case 2:
+			translate(x, y);
+			rotate(PI / 2 * (n - 1));
+			triangle(0, 0, -s / 3, s / 3, s / 3, s / 3);
+			break;
+		default:
+			if (n - 3 < settings.fonctions.length) {
+				textSize(s / 5 * 3);
+				textAlign(CENTER, CENTER);
+				text('F' + (n - 2).toString(), x, y);
+			}
+			break;
+	}
+	pop();
+}
+
+let stepList = [
+	[3]
+];
+let pos = settings.pos;
+
+function step() {
+	if (stepList.length > 0) {
+		console.log('stepList:', stepList);
+		const s = stepList.shift();
+		const d = s[0];
+		const c = s[1];
+		console.log('d:', d);
+		if (c == undefined || settings.grid[pos[0]][pos[1]] == c + 1) {
+			if (d > 2) {
+				for (let i = fonctions[d - 3].length - 1; i >= 0; i--) {
+					stepList.unshift(fonctions[d - 3][i]);
+				}
+			} else if (d == 1) {
+				pos[0] -= (pos[2] - 2) % 2;
+				pos[1] += (pos[2] - 1) % 2;
+			} else {
+				pos[2] = (pos[2] + d - 1) % 4;
+			}
 		}
 	}
 }
@@ -203,6 +238,7 @@ function loadGrid(saveData) {
 	for (const setting in data) {
 		settings[setting] = data[setting];
 	}
+	pos = settings.pos;
 }
 
 window.addEventListener('contextmenu', (e) => {
