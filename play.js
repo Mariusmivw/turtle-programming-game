@@ -398,10 +398,7 @@ function loadGrid(_saveData) {
 }
 
 function edit() {
-	sessionStorage.setItem(
-		'saveData',
-		LZString.compressToBase64(JSON.stringify(settings))
-	);
+	sessionStorage.setItem('saveData', saveData);
 	gotoCreation();
 }
 
