@@ -1,6 +1,14 @@
 <script src="lib/p5.min.js"></script>
+<script src="lib/p5.dom.js"></script>
 <script src="lib/ls-string.min.js"></script>
 <script src="play.js" defer></script>
 <div id='canvasContainer'></div>
 <button onclick="loadGrid()">Load</button>
+<button onclick="edit()">Edit</button>
+<button onclick="gotoCreation()">Create something</button>
+<button onclick="play()">Play</button>
+<button onclick="stop()">Stop</button>
+<button onclick="step()">Step</button>
+<input id="speed" type="number" value="3" min="1" max="64">
 <textarea style="display:block" id="saveData"></textarea>
+<svg id="filters" style="display:none"></svg>
