@@ -406,7 +406,7 @@ function edit() {
 }
 
 function gotoCreation() {
-	location.pathname += '/../make.html';
+	location.pathname = location.pathname.replace(/(.*)\/.*?$/, '$1/make.html');
 }
 
 function play() {

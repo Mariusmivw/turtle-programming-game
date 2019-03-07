@@ -528,7 +528,7 @@ function playLevel() {
 }
 
 function gotoPlay() {
-	location.pathname = '/../play.html';
+	location.pathname = location.pathname.replace(/(.*)\/.*?$/, '$1/play.html');
 }
 
 ['contextmenu', 'dragstart', 'drop', 'selectstart'].forEach(e => {
