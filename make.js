@@ -347,10 +347,10 @@ function selectColor(c, b) {
 
 function createP5Element(x, y, w, h, t = 'p5Element') {
 	const el = createElement(t);
-	if (typeof (x) == 'number' && typeof (y) == 'number') {
+	if (typeof(x) == 'number' && typeof(y) == 'number') {
 		el.position(x, y);
 	}
-	if (typeof (w) == 'number' && typeof (h) == 'number') {
+	if (typeof(w) == 'number' && typeof(h) == 'number') {
 		el.size(w, h);
 	}
 	el._pInst = p5.instance;
@@ -432,7 +432,7 @@ function createColorInput() {
 	colorInput.elt.min = '1';
 	colorInput.elt.max = '32';
 	colorInput.elt.id = 'colors';
-	colorInput.input(function () {
+	colorInput.input(function() {
 		setColorAmount(parseInt(this.elt.value));
 		let y = canvas.offsetTop + gridSizerSize / 2 + (ceil(settings.colors / floor(menuWidth / 25)) + 2) * 25;
 		fonctionAmountInput.position(gridSize + canvas.offsetLeft + gridSizerSize * 3, y);
@@ -467,7 +467,7 @@ function createFonctionInputs() {
 		}
 	}
 
-	fonctionAmountInput.input(function () {
+	fonctionAmountInput.input(function() {
 		const amount = parseInt(this.elt.value);
 		settings.fonctions.splice(amount);
 		const removedFonctionInputs = fonctionInputs.splice(amount);
@@ -528,7 +528,7 @@ function playLevel() {
 }
 
 function gotoPlay() {
-	location.pathname = '/play.html';
+	location.pathname = '/../play.html';
 }
 
 ['contextmenu', 'dragstart', 'drop', 'selectstart'].forEach(e => {
