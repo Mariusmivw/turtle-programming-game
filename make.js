@@ -6,7 +6,8 @@ const settings = {
 	colors: 5,
 	brushColors: [],
 	pos: [0, 0, 0],
-	fonctions: []
+	fonctions: [],
+	stars: []
 };
 let selectedGridSizer = [];
 let selectedColor = 1;
@@ -156,12 +157,18 @@ function createGridCells() {
 						settings.pos[1] = i;
 					}
 				} else {
-					if (start && settings.grid[u][i] == selectedColor) {
-						if (settings.pos[0] == u && settings.pos[1] == i) {
-							settings.pos[2] = (settings.pos[2] + 1) % 4;
-						} else {
-							settings.pos[0] = u;
-							settings.pos[1] = i;
+					if (settings.grid[u][i] == selectedColor) {
+						if (start) {
+							if (settings.stars.includes(`${u}_${i}`)) {
+								if (settings.pos[0] == u && settings.pos[1] == i) {
+									settings.pos[2] = (settings.pos[2] + 1) % 4;
+								} else {
+									settings.pos[0] = u;
+									settings.pos[1] = i;
+								}
+							} else {
+								settings.stars.push(`${u}_${i}`);
+							}
 						}
 					} else {
 						settings.grid[u][i] = selectedColor;

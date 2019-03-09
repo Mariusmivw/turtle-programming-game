@@ -8,7 +8,8 @@ const settings = {
 	fonctions: [],
 	brushColors: [],
 	colors: 3,
-	pos: [0, 0, 0]
+	pos: [0, 0, 0],
+	stars: []
 };
 let fonctions = [];
 let selectedFonction = [0, 0];
@@ -367,7 +368,7 @@ function createMenuButtons() {
 
 function createFilter(r, g, b, name) {
 	const f = `<filter id="${name}"><feColorMatrix values="${r /
-    255} 0 0 0 0 ${g / 255} 0 0 0 0 ${b / 255} 0 0 0 0 0 0 0 1 0"/><filter>`;
+		255} 0 0 0 0 ${g / 255} 0 0 0 0 ${b / 255} 0 0 0 0 0 0 0 1 0"/><filter>`;
 	document.querySelector('#filters').innerHTML += f;
 }
 
