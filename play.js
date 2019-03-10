@@ -29,7 +29,7 @@ function setup() {
 	document.getElementById('canvasContainer').append(c);
 	loadGrid(
 		sessionStorage.getItem('saveData') ||
-		'N4Ig5gTglgJiBcBtRAGANOzHtcwXTVTQEY0AWcyi6ylAo03HbAZg3vUeabbsM+6DeHEoJ7t+opuL4MxzYZIBMaFWtUaViotPl0CIAMYB7ADbGIAZwQUQAB2PWkpFwYBmxgHaGALlC9OiDTUeAC+QA==='
+		'N4Ig5gTglgJiBcBtRAGANOzHtcwXTVTQEY0AWcyi6ylAo03HbAZg3vUeabbsM+6DeHEoJ7t+opuL4MxzYZIBMaFWtUaViotPl0CIAMYB7ADbGIAZwQUQAIwgBXSwAsAwmYvWkBgA7HvRFJggwAzYwA7QwAXKEjAmmo8AF8gA'
 	);
 	sessionStorage.removeItem('saveData');
 	textAlign(LEFT, CENTER);
