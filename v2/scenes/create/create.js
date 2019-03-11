@@ -1,5 +1,5 @@
 ! function(root, factory) {
-	const deps = ['classes/Scene', './classes/Cell'];
+	const deps = ['classes/Scene', './grid', 'level', 'data'];
 	const placeOnRoot = true;
 	const nameOnRoot = 'creationScene';
 
@@ -14,32 +14,31 @@
 		}
 		module.exports = factory.apply(this, args);
 	} else {
-		// Browser globals (Note: root is not always window)
+		// Browser globals (Note: root is often but not always window)
 		const ret = factory();
 		placeOnRoot && (root[nameOnRoot] = ret);
 	}
 }('undefined' != typeof window ? window : this, function(...deps) {
-	const [Scene, Cell] = deps;
+	const [Scene, grid, level, data] = deps;
 
 
 
-	let s;
-	let test = new Cell(0, 8, 20, 20);
+	let cells;
 
 	const setup = function() {
-		// console.log(p5.instance._loop);
-		s = 0;
 		p5._loop || p5.loop();
+		cells = grid.createCells(5, 6, 20, 20);
+		console.log(data.grid);
 	}
 
 	const loop = function() {
 		p5.background(255);
-		test.draw();
-		// console.log(s++);
-		// s == 7 && p5.noLoop();
+		grid.drawCells(cells);
 	}
 
-	const term = function() {}
+	const term = function() {
+		grid.removeCells(cells);
+	}
 
 
 	return new Scene({

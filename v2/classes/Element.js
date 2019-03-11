@@ -22,7 +22,6 @@
 
 
 
-
 	return class Element {
 		constructor(settings) {
 			this.x = settings.x;
